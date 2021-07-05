@@ -1,0 +1,9 @@
+{
+	"applications": {},
+	"bootstrapPlugins": {
+		"<%=projectname%>": {
+			"component": "<%=appId%>",
+			"url": "../../../../../"
+		}
+	}
+}

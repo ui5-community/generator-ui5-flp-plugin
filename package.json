@@ -1,0 +1,48 @@
+{
+  "name": "generator-template-ui5-flp-plugin",
+  "version": "0.0.1",
+  "description": "(Sub-)generator for a UI5 Fiori Launchpad Plugin",
+  "scripts": {
+    "test": "mocha",
+    "workaround": "find . -name '.DS_Store' -delete",
+    "test:manual": "cd test/ui5-app && ui5 serve",
+    "prettier": "prettier --write ."
+  },
+  "keywords": [
+    "yeoman-generator",
+    "sap",
+    "sapui5",
+    "openui5",
+    "ui5",
+    "project-template",
+    "flp-plugin",
+    "fiori-launchpad-plugin"
+  ],
+  "author": "SAP (Amar Ubhe)",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ui5-community/generator-ui5-flp-plugin.git"
+  },
+  "files": [
+    "helpers",
+    "generators"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "glob": "^7.1.6",
+    "object-assign-deep": "^0.4.0",
+    "valid-filename": "^3.1.0",
+    "yaml": "^1.10.2",
+    "yeoman-environment": "^3.2.0",
+    "yeoman-generator": "^4.13.0",
+    "yosay": "^2.0.2"
+  },
+  "devDependencies": {
+    "execa": "^5.0.0",
+    "mocha": "^8.3.2",
+    "prettier": "2.2.1",
+    "yeoman-assert": "^3.1.1",
+    "yeoman-test": "^3.0.0"
+  }
+}
