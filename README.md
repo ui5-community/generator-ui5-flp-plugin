@@ -1,9 +1,4 @@
-# Generator for SAPUI5 Fiori Launchpad Plugin projects
-
-[![Build Status][test-image]][test-url]
-[![Dependency Status][daviddm-image]][daviddm-url]
-[![License Status][license-image]][license-url]
-
+# Generator for SAPUI5 Fiori Launchpad Plugin
 > Generator for UI5 Fiori Launchpad Plugin using UI5 Tooling. (based on the [Easy UI5 Generator](https://github.com/SAP/generator-easy-ui5))  
 > Includes
 > - Fiori Launchpad Plugin Component
