@@ -5,23 +5,48 @@
 > - Shell Extension Code Samples
 > - Opa5 Test enabled
 
-## Installation
-
-First, install [Yeoman](http://yeoman.io) and generator-ui5-flp-plugin using [npm](https://www.npmjs.com/) (assuming you have pre-installed [node.js](https://nodejs.org/)).
+## Usage with easy-ui5
 
 ```bash
-npm install -g yo
-npm install -g generator-ui5-flp-plugin
+$> npm i -g yo
+$> yo easy-ui5 flp-plugin
+
+     _-----_
+    |       |    ╭──────────────────────────╮
+    |--(o)--|    │  Welcome to the easy-ui5 │
+   `---------´   │        generator!        │
+    ( _´U`_ )    ╰──────────────────────────╯
+    /___A___\   /
+     |  ~  |
+   __'.___.'__
+ ´   `  |° ´ Y `
 ```
 
-Then generate your new project:
+Run you can use `npm start` (or `yarn start`) to start the local server for development.
+
+## Standalone usage
+
+Note the different greeting when the generator starts.
 
 ```bash
-yo ui5-flp-plugin
+$> npm i -g yo
+$> yo ./generator-ui5-project
+
+     _-----_     ╭──────────────────────────╮
+    |       |    │      Welcome to the      │
+    |--(o)--|    │    generator-flp-plugin  │
+   `---------´   │        generator!        │
+    ( _´U`_ )    ╰──────────────────────────╯
+    /___A___\   /
+     |  ~  |
+   __'.___.'__
+ ´   `  |° ´ Y `
 ```
 
-
+## Test Application
+```bash
+npm run test
+```
 ## Support
 
 Please use the GitHub bug tracking system to post questions, bug reports or to create pull requests.
-

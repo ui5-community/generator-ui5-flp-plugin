@@ -59,7 +59,6 @@ module.exports = class extends Generator {
                         "Add buttons to Me Area"
                     ];
                 },
-                default: "Content delivery network (SAPUI5)"
             },
             {
                 type: "confirm",
