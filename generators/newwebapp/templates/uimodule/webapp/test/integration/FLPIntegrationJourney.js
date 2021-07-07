@@ -3,7 +3,7 @@
 sap.ui.define([
 	"sap/ui/test/opaQunit",
 	"<%=appURI%>/test/integration/pages/FLPPlugin"
-], function (opaTest) {
+], function ( <% if (features.includes("Add a launchpad footer with button") || features.includes("Add buttons to Me Area") ) {%>opaTest<% } %>) {
 	"use strict";
 
 	QUnit.module("FLP Integration");

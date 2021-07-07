@@ -22,9 +22,19 @@ function createTest(oPrompt) {
             ]);
         });
 
-        it("ui5.yaml should leverage the ui5 zipper task", function () {
-            return assert.fileContent("uimodule/ui5.yaml", "name: ui5-task-zipper");
-        });
+        if (!!oPrompt.platform && oPrompt.platform !== "Static webserver" && oPrompt.platform !== "SAP NetWeaver") {
+            it("ui5.yaml middleware should point to the right xs-app.json file", function () {
+                return assert.fileContent(
+                    "uimodule/ui5.yaml","xsappJson: uimodule/webapp/xs-app.json"
+                );
+            });
+        }
+
+        if (!!oPrompt.platform && oPrompt.platform === "SAP Launchpad service") {
+            it("ui5.yaml should leverage the ui5 zipper task", function () {
+                return assert.fileContent("uimodule/ui5.yaml", "name: ui5-task-zipper");
+            });
+        }
 
         it("should create an installable project", function () {
             return execa.commandSync("npm install");
@@ -47,7 +57,6 @@ function createTest(oPrompt) {
                 return assert.fileContent("uimodule/webapp/Component.js", "oRenderer.addActionButton");
             });
         }
-
     });
 }
 
@@ -57,10 +66,35 @@ describe("Basic project capabilities", function () {
             features: []
         },
         {
+            ui5libs: "Content delivery network (SAPUI5)",
+            features: []
+        },
+        {
+            ui5libs: "Local resources (SAPUI5)",
+            features: []
+        },
+        {
+            ui5libs: "Local resources (SAPUI5)",
+            platform: "SAP NetWeaver",
+            features: []
+        },
+        {
+            ui5libs: "Local resources (SAPUI5)",
+            platform: "SAP Launchpad service",
             features: ["Add button to launchpad header"]
         },
         {
-            features: ["Add button to launchpad header","Add a launchpad footer with button"]
+            features: ["Add button to launchpad header"]
+        },
+        {
+            platform: "SAP Launchpad service",
+            features: ["Add button to launchpad header"]
+        },
+        {
+            features: ["Add button to launchpad header"]
+        },
+        {
+            features: ["Add button to launchpad header", "Add a launchpad footer with button"]
         },
         {
             features: ["Add button to launchpad header", "Add a launchpad footer with button", "Add buttons to Me Area"]

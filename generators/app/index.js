@@ -41,6 +41,17 @@ module.exports = class extends Generator {
             },
             {
                 type: "list",
+                name: "platform",
+                message: "On which platform would you like to host the application?",
+                choices: [
+                    "Static webserver",
+                    "SAP Launchpad service",
+                    "SAP NetWeaver"
+                ],
+                default: "Static webserver"
+            },
+            {
+                type: "list",
                 name: "ui5libs",
                 message: "Where should your UI5 libs be served from?",
                 choices: (props) => {
@@ -59,6 +70,7 @@ module.exports = class extends Generator {
                         "Add buttons to Me Area"
                     ];
                 },
+                default:[]
             },
             {
                 type: "confirm",
@@ -94,6 +106,10 @@ module.exports = class extends Generator {
         oSubGen.cwd = this.destinationRoot();
         oSubGen.modulename = "uimodule";
 
+        if (oConfig.platform === "SAP Launchpad service") {
+            this.composeWith(require.resolve("../additionalmodules"), oSubGen);
+        }
+
         this.composeWith(require.resolve("../newwebapp"), oSubGen);
     }
 
@@ -126,6 +142,45 @@ module.exports = class extends Generator {
                 dependencies: ["ui5-middleware-livereload"]
             }
         };
+
+        if (oConfig.platform !== "Static webserver" && oConfig.platform !== "SAP NetWeaver") {
+            packge.devDependencies["ui5-middleware-cfdestination"] = "^0.6.0";
+            (packge.devDependencies["ui5-task-zipper"] = "^0.4.3"), (packge.devDependencies["cross-var"] = "^1.1.0");
+            packge.devDependencies["mbt"] = "^1.2.1";
+            packge.ui5.dependencies.push("ui5-middleware-cfdestination");
+            packge.ui5.dependencies.push("ui5-task-zipper");
+
+            if (
+                oConfig.platform === "Application Router @ Cloud Foundry" ||
+                oConfig.platform === "SAP HTML5 Application Repository service for SAP BTP" ||
+                oConfig.platform === "SAP Launchpad service"
+            ) {
+                packge.scripts["build:mta"] = "mbt build";
+                packge.scripts[
+                    "deploy:cf"
+                ] = `cross-var cf deploy mta_archives/${oConfig.projectname}_$npm_package_version.mtar`;
+                packge.scripts["deploy"] = "run-s build:mta deploy:cf";
+            } else if (oConfig.platform === "Application Router @ SAP HANA XS Advanced") {
+                packge.scripts["build:mta"] = "mbt build -p=xsa";
+                packge.scripts[
+                    "deploy:cf"
+                ] = `cross-var xs deploy mta_archives/${oConfig.projectname}_$npm_package_version.mtar`;
+                packge.scripts["deploy"] = "run-s build:mta deploy:xs";
+            }
+
+            if (oConfig.platform === "SAP Launchpad service") {
+                packge.scripts.start = "ui5 serve --config=uimodule/ui5.yaml  --open flpSandbox.html";
+            }
+        }
+
+        if (oConfig.platform === "SAP NetWeaver") {
+            packge.devDependencies["ui5-task-nwabap-deployer"] = "*";
+            packge.devDependencies["ui5-middleware-route-proxy"] = "*";
+            packge.ui5.dependencies.push("ui5-task-nwabap-deployer");
+            packge.ui5.dependencies.push("ui5-middleware-route-proxy");
+            packge.scripts["deploy"] = "run-s build:ui";
+        }
+        
         await fileaccess.writeJSON.call(this, "/package.json", packge);
     }
 

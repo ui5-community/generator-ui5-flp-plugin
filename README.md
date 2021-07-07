@@ -43,9 +43,59 @@ $> yo ./generator-ui5-project
  ´   `  |° ´ Y `
 ```
 
+## Target platforms
+
+During the prompting phase, the generator will ask on which target platform your app should run. Currently, the following options are available:
+
+### Static webserver
+
+This is the most basic option. Choose this option if you want to deploy the web app in your custom environment or host it on an arbitrary server.
+
+### SAP Launchpad service
+
+Use this option if you would like to develop a Fiori Launchpad application that should run on Cloud Foundry. The generator will install a module that adds Fiori Launchpad resources to the HTML5 application repository.
+
+### SAP NetWeaver
+
+Use this option if you want to deploy your application(s) to the SAP NetWeaver ABAP Repository.
+
 ## Test Application
 ```bash
 npm run test
+```
+
+## Deployment
+
+Depending on your target platform you'll need to install additional tools:
+
+### Cloud Foundry
+
+Required tools:
+
+1. [Create a free account](https://developers.sap.com/mena/tutorials/hcp-create-trial-account.html) on SAP BTP Trial
+2. [Install](https://developers.sap.com/tutorials/cp-cf-download-cli.html) the Cloud Foundry Command Line Interface
+    ```sh
+    cf login
+    ```
+3. [Install](https://github.com/cloudfoundry-incubator/multiapps-cli-plugin) the MultiApps CF CLI Plugin
+
+Deployment steps:
+
+Call this command from the root directory to deploy the application to Cloud Foundry
+
+```
+npm run deploy
+```
+
+### SAP NetWeaver
+
+Deployment steps:
+
+Update the ui5.yaml file with your system settings (user, password & server) and ABAP repository settings (package, BSP Container & Transport).
+Run following command to deploy the application to SAP NetWeaver
+
+```
+npm run deploy
 ```
 ## Support
 

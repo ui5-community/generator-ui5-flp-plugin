@@ -5,9 +5,23 @@
 		"id": "<%=appId%>",
 		"type": "component",
 		"applicationVersion": {
-			"version": ""
+			"version": "0.0.1"
 		},
-		"title": "{{plugin_title}}"
+		"title": "{{pluginTitle}}",
+		"description": "{{pluginDescription}}",
+		"crossNavigation": {
+			"inbounds": {
+			"Shell-plugin": {
+				"signature": {
+					"parameters": {},
+					"additionalParameters": "allowed"
+				},
+				"semanticObject": "Shell",
+				"action": "plugin",
+				"hideLauncher":true
+				}
+			}
+		}
 	},
 	"sap.ui": {
 		"_version": "1.3.0",
