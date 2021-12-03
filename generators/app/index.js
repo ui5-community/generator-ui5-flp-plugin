@@ -9,6 +9,13 @@ const Generator = require("yeoman-generator"),
 module.exports = class extends Generator {
     static displayName = "Create a new Fiori Launchpad Plugin";
 
+    constructor(args, opts) {
+        super(args, opts, {
+            // disable the Yeoman 5 package-manager logic (auto install)!
+            customInstallTask: "disabled"
+        });
+    }    
+
     prompting() {
         if (!this.options.embedded) {
             this.log(yosay(`Welcome to the ${chalk.red("generator-flp-plugin")} generator!`));
