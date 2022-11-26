@@ -116,6 +116,12 @@ sap.ui.define([
 					}
 				}
 			}.bind(this));
-		}
+		},
+
+		exit: function () {
+            if (this._oShellContainer && this._onRendererCreated) {
+                this._oShellContainer.detachRendererCreatedEvent(this._onRendererCreated);
+            }
+        }
 	});
 });
