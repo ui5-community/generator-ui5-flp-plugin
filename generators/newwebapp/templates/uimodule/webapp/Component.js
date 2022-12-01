@@ -119,9 +119,9 @@ sap.ui.define([
 		},
 
 		exit: function () {
-            if (this._oShellContainer && this._onRendererCreated) {
-                this._oShellContainer.detachRendererCreatedEvent(this._onRendererCreated);
-            }
-        }
+		    if (this._oShellContainer && this._onRendererCreated) {
+			this._oShellContainer.detachRendererCreatedEvent(this._onRendererCreated);
+		    }
+		}
 	});
 });
