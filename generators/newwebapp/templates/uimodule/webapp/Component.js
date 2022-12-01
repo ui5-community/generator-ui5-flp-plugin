@@ -1,9 +1,10 @@
 sap.ui.define([
 	"sap/ui/core/Component",
+	"sap/base/util/ObjectPath",
 	"sap/m/Button",
 	"sap/m/Bar",
 	"sap/m/MessageToast"
-], function (Component, Button, Bar, MessageToast) {
+], function (Component, ObjectPath, Button, Bar, MessageToast) {
 
 	return Component.extend("<%=appId%>.Component", {
 
@@ -83,37 +84,44 @@ sap.ui.define([
 		 * listens to the &quot;rendererCreated&quot; event (plug-in is loaded
 		 * before the renderer is created).
 		 *
-		 *  @returns {object}
-		 *      a jQuery promise, resolved with the renderer instance, or
-		 *      rejected with an error message.
+		 *  @returns {Promise} a Promise which will resolve with the renderer instance, 
+		 * 					   or be rejected with an error message.
 		 */
 		_getRenderer: function () {
-			var that = this,
-				oDeferred = new jQuery.Deferred(),
-				oRenderer;
-
-			that._oShellContainer = jQuery.sap.getObject("sap.ushell.Container");
-			if (!that._oShellContainer) {
-				oDeferred.reject(
-					"Illegal state: shell container not available; this component must be executed in a unified shell runtime context.");
-			} else {
-				oRenderer = that._oShellContainer.getRenderer();
-				if (oRenderer) {
-					oDeferred.resolve(oRenderer);
+			return new Promise(function(fnResolve, fnReject) {
+				this._oShellContainer = ObjectPath.get("sap.ushell.Container");
+				if (!this._oShellContainer) {
+					fnReject(
+						"Illegal state: shell container not available; this component must be executed in a unified shell runtime context."
+					);
 				} else {
-					// renderer not initialized yet, listen to rendererCreated event
-					that._onRendererCreated = function (oEvent) {
-						oRenderer = oEvent.getParameter("renderer");
-						if (oRenderer) {
-							oDeferred.resolve(oRenderer);
-						} else {
-							oDeferred.reject("Illegal state: shell renderer not available after recieving 'rendererLoaded' event.");
-						}
-					};
-					that._oShellContainer.attachRendererCreatedEvent(that._onRendererCreated);
+					var oRenderer = this._oShellContainer.getRenderer();
+					if (oRenderer) {
+						fnResolve(oRenderer);
+					} else {
+						// renderer not initialized yet, listen to rendererCreated event
+						this._onRendererCreated = function(oEvent) {
+							oRenderer = oEvent.getParameter("renderer");
+							if (oRenderer) {
+								fnResolve(oRenderer);
+							} else {
+								fnReject(
+									"Illegal state: shell renderer not available after receiving 'rendererLoaded' event."
+								);
+							}
+						};
+						this._oShellContainer.attachRendererCreatedEvent(
+							this._onRendererCreated
+						);
+					}
 				}
-			}
-			return oDeferred.promise();
+			}.bind(this));
+		},
+
+		exit: function () {
+		    if (this._oShellContainer && this._onRendererCreated) {
+			this._oShellContainer.detachRendererCreatedEvent(this._onRendererCreated);
+		    }
 		}
 	});
 });
