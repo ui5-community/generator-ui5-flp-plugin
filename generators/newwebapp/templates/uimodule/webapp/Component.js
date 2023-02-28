@@ -14,6 +14,7 @@ sap.ui.define([
 
 		init: function () {
 			var rendererPromise = this._getRenderer();
+			var oResourceBundle = this.getModel("i18n").getResourceBundle();
 
 			// This is example code. Please replace with your implementation!
 <% if (features.includes("Add button to launchpad header")) { %>
@@ -52,12 +53,13 @@ sap.ui.define([
 			 * The first button is only visible if the Home page of SAP Fiori launchpad is open.
 			 */
 			rendererPromise.then(function (oRenderer) {
+				var _oResourceBundle = oResourceBundle;
 				oRenderer.addActionButton("sap.m.Button", {
 					id: "myHomeButton",
 					icon: "sap-icon://sys-help-2",
-					text: "Help for FLP page",
+					text: oResourceBundle.getText("buttonText"),
 					press: function () {
-						MessageToast.show("You pressed the button that opens a help page.");
+						MessageToast.show(_oResourceBundle.getText("msgMeAreaText"));
 					}
 				}, true, false, [sap.ushell.renderers.fiori2.RendererExtensions.LaunchpadState.Home]);
 
@@ -67,12 +69,12 @@ sap.ui.define([
 				oRenderer.addActionButton("sap.m.Button", {
 					id: "myAppButton",
 					icon: "sap-icon://sys-help",
-					text: "Help for App page",
+					text: oResourceBundle.getText("buttonText"),
 					press: function () {
-						MessageToast.show("You pressed the button that opens a help for apps page.");
+						MessageToast.show(_oResourceBundle.getText("msgMeAreaTextApp"));
 					}
 				}, true, false, [sap.ushell.renderers.fiori2.RendererExtensions.LaunchpadState.App]);
-			});
+			}.bind(this));
 <% } %>
 		},
 
