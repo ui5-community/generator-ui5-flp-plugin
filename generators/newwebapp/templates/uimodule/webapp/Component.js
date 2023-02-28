@@ -57,7 +57,7 @@ sap.ui.define([
 				oRenderer.addActionButton("sap.m.Button", {
 					id: "myHomeButton",
 					icon: "sap-icon://sys-help-2",
-					text: oResourceBundle.getText("buttonText"),
+					text: _oResourceBundle.getText("buttonText"),
 					press: function () {
 						MessageToast.show(_oResourceBundle.getText("msgMeAreaText"));
 					}
@@ -69,7 +69,7 @@ sap.ui.define([
 				oRenderer.addActionButton("sap.m.Button", {
 					id: "myAppButton",
 					icon: "sap-icon://sys-help",
-					text: oResourceBundle.getText("buttonText"),
+					text: _oResourceBundle.getText("buttonText"),
 					press: function () {
 						MessageToast.show(_oResourceBundle.getText("msgMeAreaTextApp"));
 					}
