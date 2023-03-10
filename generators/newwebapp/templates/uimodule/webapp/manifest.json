@@ -39,6 +39,14 @@
 			"compact": true,
 			"cozy": false
 		},
+		"models": {
+		    "i18n": {
+			"type": "sap.ui.model.resource.ResourceModel",
+			"settings": {
+			    "bundleName": "<%=appId%>.i18n.i18n"
+			}
+		    }
+		},
 		"dependencies": {
 			"minUI5Version": "1.38.1",
 			"libs": {
