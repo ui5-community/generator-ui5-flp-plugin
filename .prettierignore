@@ -1,1 +1,4 @@
-generators/newwebapp/templates/uimodule/ui5.yaml
+# Ignore test files
+test/*/
+
+# Ignore all source files using the placeholders to kill the syntax
