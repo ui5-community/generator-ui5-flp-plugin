@@ -1,9 +1,14 @@
-const Generator = require("yeoman-generator"),
-    fileaccess = require("../../helpers/fileaccess"),
-    path = require("path"),
-    glob = require("glob");
 
-module.exports = class extends Generator {
+import Generator from "yeoman-generator";
+import path from "path";
+import { glob } from "glob";
+import url from "url";
+import { manipulateJSON,writeYAML } from "../../helpers/fileaccess.js";
+import { createRequire } from "node:module"
+const require = createRequire(import.meta.url)
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
+export default class extends Generator {
     static hidden = true;
 
     prompting() {
@@ -55,7 +60,7 @@ module.exports = class extends Generator {
         });
 
         if (this.options.oneTimeConfig.platform === "SAP Launchpad service") {
-            await fileaccess.manipulateJSON.call(this, "/" + sModuleName + "/webapp/manifest.json", {
+            await manipulateJSON.call(this, "/" + sModuleName + "/webapp/manifest.json", {
                 ["sap.cloud"]: {
                     service: this.options.oneTimeConfig.projectname + ".service"
                 }
@@ -63,7 +68,9 @@ module.exports = class extends Generator {
         }
 
         // Append to Main package.json
-        await fileaccess.manipulateJSON.call(this, "/package.json", function (packge) {
+        var sPackageJsonPath = this.destinationPath("package.json");
+        console.info("Package Path : "+ sPackageJsonPath);
+        this.fs.extendJSON( sPackageJsonPath, function (packge) {
             packge.scripts["serve:" + sModuleName] = "ui5 serve --config=" + sModuleName + "/ui5.yaml";
             packge.scripts["build:ui"] += " build:" + sModuleName;
             let buildCommand = "ui5 build --config=" + sModuleName + "/ui5.yaml --clean-dest";
@@ -81,7 +88,7 @@ module.exports = class extends Generator {
         });
 
         if (this.options.oneTimeConfig.platform === "SAP Launchpad service") {
-            await fileaccess.writeYAML.call(this, "/mta.yaml", (mta) => {
+            await writeYAML.call(this, "/mta.yaml", (mta) => {
                 const deployer = mta.modules.find((module) => module.name === "webapp_deployer");
 
                 deployer["build-parameters"]["requires"].push({

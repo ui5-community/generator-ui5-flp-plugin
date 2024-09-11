@@ -1,9 +1,9 @@
-const Generator = require("yeoman-generator"),
-    fileaccess = require("../../helpers/fileaccess"),
-    path = require("path"),
-    glob = require("glob");
-
-module.exports = class extends Generator {
+import Generator from "yeoman-generator";
+import { glob } from "glob";
+import yaml from "yaml";
+import path from "path";
+import { writeYAML } from "../../helpers/fileaccess.js";
+export default class extends Generator {
     static hidden = true;
 
     prompting() {
@@ -189,6 +189,6 @@ module.exports = class extends Generator {
             }
         }
 
-        await fileaccess.writeYAML.call(this, "/mta.yaml", mta);
+        await writeYAML.call(this, "/mta.yaml", mta);
     }
 };

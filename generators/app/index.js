@@ -1,12 +1,21 @@
-"use strict";
-const Generator = require("yeoman-generator"),
-    fileaccess = require("../../helpers/fileaccess"),
-    path = require("path"),
-    chalk = require("chalk"),
-    yosay = require("yosay"),
-    glob = require("glob");
 
-module.exports = class extends Generator {
+import chalk from "chalk";
+import fs from "fs";
+import Generator from "yeoman-generator";
+import yaml from "yaml";
+import path from "path";
+import yosay from "yosay";
+import { glob } from "glob";
+import { writeJSON } from "../../helpers/fileaccess.js";
+import url from "url";
+import WebAppGenerator from "../newwebapp/index.js";
+import AdditionModulesGenerator from "../additionalmodules/index.js";
+import { createRequire } from "node:module"
+const require = createRequire(import.meta.url)
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
+
+export default class extends Generator {
     static displayName = "Create a new Fiori Launchpad Plugin";
 
     constructor(args, opts) {
@@ -114,10 +123,16 @@ module.exports = class extends Generator {
         oSubGen.modulename = "uimodule";
 
         if (oConfig.platform === "SAP Launchpad service") {
-            this.composeWith(require.resolve("../additionalmodules"), oSubGen);
+            this.composeWith({
+                Generator : AdditionModulesGenerator,
+                path: require.resolve("../additionalmodules")
+            }, oSubGen);
         }
 
-        this.composeWith(require.resolve("../newwebapp"), oSubGen);
+        this.composeWith({
+            Generator:WebAppGenerator,
+            path : require.resolve("../newwebapp")
+        }, oSubGen);
     }
 
     async addPackage() {
@@ -187,16 +202,17 @@ module.exports = class extends Generator {
             packge.ui5.dependencies.push("ui5-middleware-route-proxy");
             packge.scripts["deploy"] = "run-s build:ui";
         }
-        
-        await fileaccess.writeJSON.call(this, "/package.json", packge);
+        var sPackageJsonPath = this.destinationPath("package.json");
+        console.info("Package Path : "+ sPackageJsonPath);
+        this.fs.extendJSON(sPackageJsonPath, packge);
+        //await writeJSON.call(this,sPackageJsonPath , packge);
     }
 
     install() {
         this.config.set("setupCompleted", true);
-        this.installDependencies({
-            bower: false,
-            npm: true
-        });
+        this.spawnCommandSync("npm", ["install"], {
+			cwd: this.destinationPath()
+		});
     }
 
     end() {
