@@ -105,7 +105,7 @@ export default class extends Generator {
                 type: "checkbox",
                 name: "features",
                 message: "Do you want to add sample code?",
-                choices: (props) => {
+                choices: () => {
                     return [
                         "Add button to launchpad header",
                         "Add a launchpad footer with button",

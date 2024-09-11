@@ -2,3 +2,5 @@
 test/*/
 
 # Ignore all source files using the placeholders to kill the syntax
+generators/app/templates/webapp/Component.js
+generators/app/templates/webapp/test/*
