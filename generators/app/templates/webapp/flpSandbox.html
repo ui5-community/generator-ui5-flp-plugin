@@ -61,7 +61,7 @@
             "<%= appId %>": "./"
         }'
             data-sap-ui-theme="<%= defaultTheme %>"
-            data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
+            data-sap-ui-oninit="module:appconfig/appstart"
             data-sap-ui-async="true"
             data-sap-ui-compatVersion="edge"
             data-sap-ui-frameOptions="trusted"
@@ -71,6 +71,6 @@
     </head>
 
     <body class="sapUiBody">
-        <div data-sap-ui-component data-name="<%= appId %>"></div>
+        <div id="content"></div>
     </body>
 </html>
