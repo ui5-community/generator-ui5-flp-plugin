@@ -69,7 +69,7 @@ export default class extends Generator {
 
         // Append to Main package.json
         var sPackageJsonPath = this.destinationPath("package.json");
-        console.info("Package Path : "+ sPackageJsonPath);
+       
         this.fs.extendJSON( sPackageJsonPath, function (packge) {
             packge.scripts["serve:" + sModuleName] = "ui5 serve --config=" + sModuleName + "/ui5.yaml";
             packge.scripts["build:ui"] += " build:" + sModuleName;

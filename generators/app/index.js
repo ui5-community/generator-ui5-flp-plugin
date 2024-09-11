@@ -203,7 +203,7 @@ export default class extends Generator {
             packge.scripts["deploy"] = "run-s build:ui";
         }
         var sPackageJsonPath = this.destinationPath("package.json");
-        console.info("Package Path : "+ sPackageJsonPath);
+       // console.info("Package Path : "+ sPackageJsonPath);
         this.fs.extendJSON(sPackageJsonPath, packge);
         //await writeJSON.call(this,sPackageJsonPath , packge);
     }

@@ -1,12 +1,18 @@
-const assert = require("yeoman-assert");
-const path = require("path");
-const helpers = require("yeoman-test");
-const execa = require("execa");
+import assert from "yeoman-assert";
+import path, { dirname } from "path";
+import helpers, { result } from "yeoman-test";
+import execa from "execa";
+import { fileURLToPath } from "url"
+//const assert = require("yeoman-assert");
+//const path = require("path");
+//const helpers = require("yeoman-test");
+//const execa = require("execa");
 
 const IsCIRun = process.env.CI;
 
 function createTest(oPrompt) {
     describe(Object.values(oPrompt).join("-"), function () {
+        const __dirname = dirname(fileURLToPath(import.meta.url))
         this.timeout(200000);
 
         it("should be able to create the project", function () {
