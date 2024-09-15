@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "format:staged": "pretty-quick --staged --verbose",
     "test": "cd test && yo ../generators/app/index.js",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "hooks:pre-commit": "npm run format:staged && npm run lint:staged"
   },
   "keywords": [
