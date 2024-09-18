@@ -1,10 +1,10 @@
-# UI5 Application <%= namespace %>
+# UI5 FLP Plugin <%= namespace %>
 
 Insert the purpose of this project and some interesting info here...
 
 ## Description
 
-This app demonstrates a setup for developing UI5 applications.
+This app demonstrates a setup for developing FLP Plugin.
 
 ## Requirements
 

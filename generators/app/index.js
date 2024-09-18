@@ -117,7 +117,7 @@ export default class extends Generator {
             {
                 type: "input",
                 name: "author",
-                message: "Who is the author of the application?",
+                message: "Who is the author of the FLP Plugin?",
                 default: this.user.git.name()
             },
             {
