@@ -1,27 +1,43 @@
-"use strict";
-const Generator = require("yeoman-generator"),
-    fileaccess = require("../../helpers/fileaccess"),
-    path = require("path"),
-    chalk = require("chalk"),
-    yosay = require("yosay"),
-    glob = require("glob");
+import url from "url";
 
-module.exports = class extends Generator {
+// all below required dependencies need to be listed
+// as dependencies in the package.json (not devDeps!)
+import Generator from "yeoman-generator";
+import yosay from "yosay";
+import chalk from "chalk";
+import { glob } from "glob";
+import packageJson from "package-json";
+import semver from "semver";
+import upath from "upath";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
+export default class extends Generator {
     static displayName = "Create a new Fiori Launchpad Plugin";
+    static nestedGenerators = ["wdi5"]; // add wdi5 support
 
     constructor(args, opts) {
         super(args, opts, {
             // disable the Yeoman 5 package-manager logic (auto install)!
             customInstallTask: "disabled"
         });
-    }    
+    }
 
     prompting() {
+        // Have Yeoman greet the user.
         if (!this.options.embedded) {
             this.log(yosay(`Welcome to the ${chalk.red("generator-flp-plugin")} generator!`));
         }
 
-        return this.prompt([
+        const fwkInfo = {
+            SAPUI5: {
+                minVersion: "1.77.0",
+                cdnDomain: "ui5.sap.com",
+                npmPackage: "@sapui5/distribution-metadata"
+            }
+        };
+
+        const prompts = [
             {
                 type: "input",
                 name: "projectname",
@@ -36,182 +52,158 @@ module.exports = class extends Generator {
             },
             {
                 type: "input",
-                name: "namespaceUI5",
-                message: "Which namespace do you want to use?",
+                name: "namespace",
+                message: "Enter your application id (namespace)?",
                 validate: (s) => {
-                    if (/^[a-zA-Z0-9_\.]*$/g.test(s)) {
+                    if (/^[a-zA-Z0-9][a-zA-Z0-9_.]*$/g.test(s)) {
                         return true;
                     }
+
                     return "Please use alpha numeric characters and dots only for the namespace.";
                 },
-                default: "com.myorg"
+                default: "com.myorg.myflpplugin"
             },
             {
                 type: "list",
-                name: "platform",
-                message: "On which platform would you like to host the application?",
-                choices: [
-                    "Static webserver",
-                    "SAP Launchpad service",
-                    "SAP NetWeaver"
-                ],
-                default: "Static webserver"
+                name: "framework",
+                message: "Which framework do you want to use?",
+                choices: Object.keys(fwkInfo),
+                default: Object.keys(fwkInfo)[0]
             },
             {
-                type: "list",
-                name: "ui5libs",
-                message: "Where should your UI5 libs be served from?",
-                choices: (props) => {
-                    return ["Content delivery network (SAPUI5)", "Local resources (SAPUI5)"];
+                when: (response) => {
+                    this._minFwkVersion = fwkInfo[response.framework].minVersion;
+                    return true;
                 },
-                default: "Content delivery network (SAPUI5)"
+                type: "input", // HINT: we could also use the version info from OpenUI5/SAPUI5 to provide a selection!
+                name: "frameworkVersion",
+                message: "Which framework version do you want to use?",
+                default: async (answers) => {
+                    const minVersion = fwkInfo[answers.framework].minVersion;
+                    const npmPackage = fwkInfo[answers.framework].npmPackage;
+                    try {
+                        return (
+                            await packageJson(npmPackage, {
+                                version: "*" // use highest version, not latest!
+                            })
+                        ).version;
+                    } catch (ex) {
+                        chalk.red("Failed to lookup latest version for ${npmPackage}! Fallback to min version...");
+                        return minVersion[answers.framework];
+                    }
+                },
+                validate: (v) => {
+                    return (
+                        (v && semver.valid(v) && semver.gte(v, this._minFwkVersion)) ||
+                        chalk.red(
+                            `Framework requires the min version ${this._minFwkVersion} due to the availability of the NPM packages!`
+                        )
+                    );
+                }
             },
             {
                 type: "checkbox",
                 name: "features",
                 message: "Do you want to add sample code?",
-                choices: (props) => {
+                choices: () => {
                     return [
                         "Add button to launchpad header",
                         "Add a launchpad footer with button",
                         "Add buttons to Me Area"
                     ];
                 },
-                default:[]
+                default: []
+            },
+            {
+                type: "input",
+                name: "author",
+                message: "Who is the author of the FLP Plugin?",
+                default: this.user.git.name()
             },
             {
                 type: "confirm",
                 name: "newdir",
-                message: "Would you like to create a new directory for the project?",
+                message: "Would you like to create a new directory for the application?",
+                default: true
+            },
+            {
+                type: "confirm",
+                name: "initrepo",
+                message: "Would you like to initialize a local git repository for the application?",
                 default: true
             }
-        ]).then((answers) => {
-            if (answers.newdir) {
-                this.destinationRoot(`${answers.namespaceUI5}.${answers.projectname}`);
+        ];
+
+        return this.prompt(prompts).then((props) => {
+            // use the namespace and the application name as new subdirectory
+            if (props.newdir) {
+                this.destinationRoot(this.destinationPath(`${props.namespace}`));
             }
-            this.config.set(answers);
-            this.config.set("namespaceURI", answers.namespaceUI5.split(".").join("/"));
+            delete props.newdir;
+
+            // apply the properties
+            this.config.set(props);
+
+            // appId + appURI
+            this.config.set("appId", `${props.namespace}`);
+            this.config.set("appURI", `${props.namespace.split(".").join("/")}`);
+
+            // CDN domain
+            this.config.set("cdnDomain", fwkInfo[props.framework].cdnDomain);
+
+            // default theme
+            if (semver.gte(props.frameworkVersion, "1.108.0")) {
+                this.config.set("defaultTheme", "sap_horizon");
+            } else {
+                this.config.set("defaultTheme", "sap_fiori_3");
+            }
+
+            // set qunit coverage file
+            if (semver.gte(props.frameworkVersion, "1.113.0")) {
+                this.config.set("qunitCoverageFile", `qunit-coverage-istanbul.js`);
+            } else {
+                this.config.set("qunitCoverageFile", `qunit-coverage.js`);
+            }
+
+            // version parameters
+            this.config.set("gte1_98_0", semver.gte(props.frameworkVersion, "1.98.0"));
+            this.config.set("gte1_104_0", semver.gte(props.frameworkVersion, "1.104.0"));
         });
     }
 
-    async writing() {
+    writing() {
         const oConfig = this.config.getAll();
 
-        this.sourceRoot(path.join(__dirname, "templates"));
+        this.sourceRoot(upath.join(__dirname, "templates"));
         glob.sync("**", {
             cwd: this.sourceRoot(),
             nodir: true
         }).forEach((file) => {
             const sOrigin = this.templatePath(file);
-            const sTarget = this.destinationPath(file.replace(/^_/, "").replace(/\/_/, "/"));
+            let sTarget = this.destinationPath(file.replace(/^_/, "").replace(/\/_/, "/"));
 
             this.fs.copyTpl(sOrigin, sTarget, oConfig);
         });
-
-        const oSubGen = Object.assign({}, oConfig);
-        oSubGen.isSubgeneratorCall = true;
-        oSubGen.cwd = this.destinationRoot();
-        oSubGen.modulename = "uimodule";
-
-        if (oConfig.platform === "SAP Launchpad service") {
-            this.composeWith(require.resolve("../additionalmodules"), oSubGen);
-        }
-
-        this.composeWith(require.resolve("../newwebapp"), oSubGen);
-    }
-
-    async addPackage() {
-        const oConfig = this.config.getAll();
-        let packge = {
-            name: oConfig.projectname,
-            version: "0.0.1",
-            scripts: {
-                start: "ui5 serve --config=uimodule/ui5.yaml  --open flpSandbox.html",
-                "build:ui": "run-s ",
-                test: "run-s lint karma",
-                "karma-ci": "karma start karma-ci.conf.js",
-                clearCoverage: "shx rm -rf coverage",
-                karma: "run-s clearCoverage karma-ci",
-                lint: "eslint ."
-            },
-            devDependencies: {
-                shx: "^0.3.3",
-                "@ui5/cli": "^2.11.2",
-                "ui5-middleware-livereload": "^0.5.4",
-                karma: "^6.3.4",
-                "karma-chrome-launcher": "^3.1.0",
-                "karma-coverage": "^2.0.3",
-                "karma-ui5": "^2.3.4",
-                "npm-run-all": "^4.1.5",
-                eslint: "^7.29.0"
-            },
-            ui5: {
-                dependencies: ["ui5-middleware-livereload"]
-            }
-        };
-
-        if (oConfig.platform !== "Static webserver" && oConfig.platform !== "SAP NetWeaver") {
-            packge.devDependencies["ui5-middleware-cfdestination"] = "^0.6.0";
-            (packge.devDependencies["ui5-task-zipper"] = "^0.4.3"), (packge.devDependencies["cross-var"] = "^1.1.0");
-            packge.devDependencies["mbt"] = "^1.2.1";
-            packge.ui5.dependencies.push("ui5-middleware-cfdestination");
-            packge.ui5.dependencies.push("ui5-task-zipper");
-
-            if (
-                oConfig.platform === "Application Router @ Cloud Foundry" ||
-                oConfig.platform === "SAP HTML5 Application Repository service for SAP BTP" ||
-                oConfig.platform === "SAP Launchpad service"
-            ) {
-                packge.scripts["build:mta"] = "mbt build";
-                packge.scripts[
-                    "deploy:cf"
-                ] = `cross-var cf deploy mta_archives/${oConfig.projectname}_$npm_package_version.mtar`;
-                packge.scripts["deploy"] = "run-s build:mta deploy:cf";
-            } else if (oConfig.platform === "Application Router @ SAP HANA XS Advanced") {
-                packge.scripts["build:mta"] = "mbt build -p=xsa";
-                packge.scripts[
-                    "deploy:cf"
-                ] = `cross-var xs deploy mta_archives/${oConfig.projectname}_$npm_package_version.mtar`;
-                packge.scripts["deploy"] = "run-s build:mta deploy:xs";
-            }
-
-            if (oConfig.platform === "SAP Launchpad service") {
-                packge.scripts.start = "ui5 serve --config=uimodule/ui5.yaml  --open flpSandbox.html";
-            }
-        }
-
-        if (oConfig.platform === "SAP NetWeaver") {
-            packge.devDependencies["ui5-task-nwabap-deployer"] = "*";
-            packge.devDependencies["ui5-middleware-route-proxy"] = "*";
-            packge.ui5.dependencies.push("ui5-task-nwabap-deployer");
-            packge.ui5.dependencies.push("ui5-middleware-route-proxy");
-            packge.scripts["deploy"] = "run-s build:ui";
-        }
-        
-        await fileaccess.writeJSON.call(this, "/package.json", packge);
     }
 
     install() {
         this.config.set("setupCompleted", true);
-        this.installDependencies({
-            bower: false,
-            npm: true
+        this.spawnCommandSync("npm", ["install"], {
+            cwd: this.destinationPath()
         });
     }
 
     end() {
-        this.spawnCommandSync("git", ["init", "--quiet"], {
-            cwd: this.destinationPath()
-        });
-        this.spawnCommandSync("git", ["add", "."], {
-            cwd: this.destinationPath()
-        });
-        this.spawnCommandSync(
-            "git",
-            ["commit", "--quiet", "--allow-empty", "-m", "Initialize repository with easy-ui5"],
-            {
+        if (this.config.get("initrepo")) {
+            this.spawnCommandSync("git", ["init", "--quiet"], {
                 cwd: this.destinationPath()
-            }
-        );
+            });
+            this.spawnCommandSync("git", ["add", "."], {
+                cwd: this.destinationPath()
+            });
+            this.spawnCommandSync("git", ["commit", "--quiet", "--allow-empty", "-m", "Initial commit"], {
+                cwd: this.destinationPath()
+            });
+        }
     }
-};
+}
