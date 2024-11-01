@@ -1,8 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html class="sapUShellFullHeight">
     <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+        <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Fiori Launchpad Sandbox</title>
 
@@ -49,46 +51,26 @@
             };
         </script>
 
-        <script
-            id="sap-ui-bootstrap"
-            src="<%= ui5libs === 'Content delivery network (SAPUI5)' ?
-            'https://sapui5.hana.ondemand.com/test-resources/sap/ushell/bootstrap/sandbox.js' : 'test-resources/sap/ushell/bootstrap/sandbox.js'  %>"
-        ></script>
+        <script id="sap-ui-bootstrap" src="test-resources/sap/ushell/bootstrap/sandbox.js"></script>
 
         <script
             id="sap-ui-bootstrap"
-            src="<%= ui5libs === 'Content delivery network (SAPUI5)' ?
-            'https://sapui5.hana.ondemand.com/resources/sap-ui-core.js' : 'resources/sap-ui-core.js'  %>"
-            data-sap-ui-evt-oninit="main();"
-            data-sap-ui-libs="sap.m"
-            data-sap-ui-theme="sap_fiori_3"
-            data-sap-ui-compatVersion="edge"
+            src="resources/sap-ui-core.js"
+            data-sap-ui-resourceroots='{
+            "appconfig":"./appconfig",
+            "<%= appId %>": "./"
+        }'
+            data-sap-ui-theme="<%= defaultTheme %>"
+            data-sap-ui-oninit="module:appconfig/appstart"
             data-sap-ui-async="true"
-            data-sap-ui-frameOptions="allow"
+            data-sap-ui-compatVersion="edge"
+            data-sap-ui-frameOptions="trusted"
+            data-sap-ui-xx-waitForTheme="true"
+            data-sap-ui-xx-supportedLanguages="en,de"
         ></script>
-
-        <script type="text/javascript">
-            /**
-             * Main method to be executed once SAPUI5 has been initialized.
-             */
-            function main() {
-                "use strict";
-                /*global sap */
-
-                // load and register Fiori2 icon font
-                jQuery.sap.require("sap.ushell.iconfonts");
-                jQuery.sap.require("sap.ushell.services.AppConfiguration");
-                sap.ushell.iconfonts.registerFiori2IconFont();
-
-                // clean fiori loading screen markup before placing main content
-                var oContent = sap.ushell.Container.createRenderer();
-                jQuery("#canvas").empty();
-                oContent.placeAt("canvas");
-            }
-        </script>
     </head>
 
-    <body class="sapUiBody sapUShellFullHeight">
-        <div id="canvas" class="sapUShellFullHeight" />
+    <body class="sapUiBody">
+        <div id="content"></div>
     </body>
 </html>
