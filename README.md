@@ -10,7 +10,7 @@
 ## Usage with easy-ui5
 
 ```bash
-$> npm i -g yo
+$> npm i -g yo generator-easy-ui5
 $> yo easy-ui5 flp-plugin
 
      _-----_
